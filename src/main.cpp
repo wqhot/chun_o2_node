@@ -38,12 +38,33 @@ void setup()
     serial_report.begin(115200, SERIAL_8N1);
 }
 
+bool recv(float &o2)
+{
+    const size_t len = 8;
+    uint8_t buffer[len] = {0};
+    serial_o2.write("read O2 Data");
+    size_t l = serial_o2.readBytes(buffer, len);
+    if (l != len)
+    {
+        o2 = -1;
+        return false;
+    }
+    o2 = 10.0f * (buffer[3] - '0') + 1.0f * (buffer[4] - '0') + 0.1f * (buffer[6] - '0');
+    return true;
+}
+
 void loop()
 {
     uint8_t buffer[17];
     uint8_t sum;
+    float o2;
+    if (!recv(o2))
+    {
+        delay(1000);
+        return;
+    }
     getId(buffer);
-    setNum(buffer + 12, 1.0f);
+    setNum(buffer + 12, o2);
     sum = getSum(buffer, 16);
     buffer[16] = sum;
     serial_report.write(head, 4);
