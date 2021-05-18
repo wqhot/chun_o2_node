@@ -1,14 +1,24 @@
 #include <Arduino.h>
-#include <HardwareSerial.h>
 #include <string>
+#define LED_PIN PC13
 
-HardwareSerial serial_o2(2);
-HardwareSerial serial_report(1);
+/**
+ *定义串口对象
+ * */
+HardwareSerial serial_report(PA10, PA9);
+HardwareSerial serial_o2(PA3, PA2);
 const uint8_t head[4] = {0x1, 0x2, 0x3, 0x4};
+
+void setup()
+{
+    pinMode(LED_PIN, OUTPUT);
+    serial_o2.begin(115200);
+    serial_report.begin(115200);
+}
 
 void getId(uint8_t *id)
 {
-    memcpy(id, (const void*)(0x1FFFF7E8), 12);
+    memcpy(id, (const void *)(0x1FFFF7E8), 12);
 }
 
 uint8_t getSum(const uint8_t *buffer, size_t length)
@@ -32,12 +42,6 @@ void setNum(uint8_t *buffer, const float num)
     memcpy(buffer, t.c, 4);
 }
 
-void setup()
-{
-    serial_o2.begin(115200, SERIAL_8N1);
-    serial_report.begin(115200, SERIAL_8N1);
-}
-
 bool recv(float &o2)
 {
     const size_t len = 8;
@@ -58,16 +62,22 @@ void loop()
     uint8_t buffer[17];
     uint8_t sum;
     float o2;
+    serial_report.write("Rec...\n");
+    digitalWrite(LED_PIN, LOW); //小灯亮
+    delay(500);
     if (!recv(o2))
     {
-        delay(1000);
-        return;
+        serial_report.write("No sensor\n");
     }
-    getId(buffer);
-    setNum(buffer + 12, o2);
-    sum = getSum(buffer, 16);
-    buffer[16] = sum;
-    serial_report.write(head, 4);
-    serial_report.write(buffer, 17);
+    else
+    {
+        getId(buffer);
+        setNum(buffer + 12, o2);
+        sum = getSum(buffer, 16);
+        buffer[16] = sum;
+        serial_report.write(head, 4);
+        serial_report.write(buffer, 17);
+    }
+    digitalWrite(LED_PIN, HIGH); //小灯灭
     delay(1000);
 }
