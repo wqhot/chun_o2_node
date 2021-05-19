@@ -44,7 +44,7 @@ void setNum(uint8_t *buffer, const float num)
 
 bool recv(float &o2)
 {
-    const size_t len = 8;
+    const size_t len = 10;
     uint8_t buffer[len] = {0};
     serial_o2.write("read O2 Data");
     size_t l = serial_o2.readBytes(buffer, len);
