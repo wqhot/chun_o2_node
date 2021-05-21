@@ -62,7 +62,6 @@ void loop()
     uint8_t buffer[17];
     uint8_t sum;
     float o2;
-    serial_report.write("Rec...\n");
     digitalWrite(LED_PIN, LOW); //小灯亮
     delay(500);
     if (!recv(o2))
