@@ -49,27 +49,8 @@ bool recv(uint8_t *buffer)
 {
     const size_t len = 4;
     serial_o2.write("read O2 Data");
-    int c = serial_o2.read();
-    while (c >= 0)
-    {
-        if (c=='=')
-        {
-            break;
-        }
-        else
-        {
-            c = serial_o2.read();
-        }
-    }
-    int length = 0;
-    c = serial_o2.read();
-    while (c > 0 && (length < len))
-    {
-        buffer[length] = c;
-        ++length;
-        c = serial_o2.read();
-    }
-    if (length != len)
+    size_t l = serial_o2.readBytes(buffer, len);
+    if (l != len)
     {
         return false;
     }
@@ -112,23 +93,23 @@ bool recv(float &o2)
 
 void loop()
 {
-    uint8_t buffer[17];
+    uint8_t buffer[23];
     uint8_t sum;
     float o2;
     digitalWrite(LED_PIN, LOW); //小灯亮
     delay(500);
-    if (!recv(o2))
+    if (!recv(buffer + 16))
     {
         serial_report.write("No sensor\n");
     }
     else
     {
         getId(buffer);
-        setNum(buffer + 12, o2);
-        sum = getSum(buffer, 16);
+        // setNum(buffer + 12, o2);
+        sum = getSum(buffer, 22);
         buffer[16] = sum;
         serial_report.write(head, 4);
-        serial_report.write(buffer, 17);
+        serial_report.write(buffer, 23);
     }
     digitalWrite(LED_PIN, HIGH); //小灯灭
     delay(1000);
