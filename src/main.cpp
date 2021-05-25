@@ -42,6 +42,37 @@ void setNum(uint8_t *buffer, const float num)
     memcpy(buffer, t.c, 4);
 }
 
+bool recv(uint8_t *buffer)
+{
+    const size_t len = 4;
+    serial_o2.write("read O2 Data");
+    int c = serial_o2.read();
+    while (c >= 0)
+    {
+        if (c=='=')
+        {
+            break;
+        }
+        else
+        {
+            c = serial_o2.read();
+        }
+    }
+    int length = 0;
+    c = serial_o2.read();
+    while (c > 0 && (length < len))
+    {
+        buffer[length] = c;
+        ++length;
+        c = serial_o2.read();
+    }
+    if (length != len)
+    {
+        return false;
+    }
+    return true;
+}
+
 bool recv(float &o2)
 {
     const size_t len = 4;
@@ -61,7 +92,7 @@ bool recv(float &o2)
     }
     int length = 0;
     c = serial_o2.read();
-    while (c > 0 && length < len)
+    while (c > 0 && (length < len))
     {
         buffer[length] = c;
         ++length;
@@ -83,14 +114,14 @@ void loop()
     float o2;
     digitalWrite(LED_PIN, LOW); //小灯亮
     delay(500);
-    if (!recv(o2))
+    if (!recv(buffer + 16))
     {
         serial_report.write("No sensor\n");
     }
     else
     {
         getId(buffer);
-        setNum(buffer + 12, o2);
+        // setNum(buffer + 12, o2);
         sum = getSum(buffer, 16);
         buffer[16] = sum;
         serial_report.write(head, 4);
