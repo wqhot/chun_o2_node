@@ -120,7 +120,7 @@ void loop()
         getId(buffer);
         // setNum(buffer + 12, o2);
         sum = getSum(buffer, 22);
-        buffer[16] = sum;
+        buffer[22] = sum;
         serial_report.write(head, 4);
         serial_report.write(buffer, 23);
     }
