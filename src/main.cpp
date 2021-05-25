@@ -62,7 +62,7 @@ bool recv(uint8_t *buffer)
 {
     const size_t len = 10;
     serial_o2.write("read O2 Data");
-    size_t l = recvData(buffer, len);
+    size_t l = serial_o2.readBytes(buffer, len);
     if (l != len)
     {
         return false;
@@ -111,7 +111,7 @@ void loop()
     float o2;
     digitalWrite(LED_PIN, LOW); //小灯亮
     delay(500);
-    if (!recv(buffer + 16))
+    if (!recv(buffer + 12))
     {
         serial_report.write("No sensor\n");
     }
