@@ -44,16 +44,35 @@ void setNum(uint8_t *buffer, const float num)
 
 bool recv(float &o2)
 {
-    const size_t len = 10;
+    const size_t len = 4;
     uint8_t buffer[len] = {0};
     serial_o2.write("read O2 Data");
-    size_t l = serial_o2.readBytes(buffer, len);
-    if (l != len)
+    int c = serial_o2.read();
+    while (c >= 0)
+    {
+        if (c=='=')
+        {
+            break;
+        }
+        else
+        {
+            c = serial_o2.read();
+        }
+    }
+    int length = 0;
+    c = serial_o2.read();
+    while (c > 0 && length < len)
+    {
+        buffer[length] = c;
+        ++length;
+        c = serial_o2.read();
+    }
+    if (length != len)
     {
         o2 = -1;
         return false;
     }
-    o2 = 10.0f * (buffer[3] - '0') + 1.0f * (buffer[4] - '0') + 0.1f * (buffer[6] - '0');
+    o2 = 10.0f * (buffer[0] - '0') + 1.0f * (buffer[1] - '0') + 0.1f * (buffer[3] - '0');
     return true;
 }
 
