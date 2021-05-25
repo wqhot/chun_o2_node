@@ -45,11 +45,24 @@ void setNum(uint8_t *buffer, const float num)
     buffer[2] = static_cast<int>(num * 10) % 10 + '0';
 }
 
+int recvData(uint8_t *buffer, int maxLength)
+{
+    int c = serial_o2.read();
+    int length = 0;
+    while (c > 0 && length < maxLength)
+    {
+        buffer[length] = c;
+        ++length;
+        c = serial_o2.read();
+    }
+    return length;
+}
+
 bool recv(uint8_t *buffer)
 {
-    const size_t len = 4;
+    const size_t len = 10;
     serial_o2.write("read O2 Data");
-    size_t l = serial_o2.readBytes(buffer, len);
+    size_t l = recvData(buffer, len);
     if (l != len)
     {
         return false;
