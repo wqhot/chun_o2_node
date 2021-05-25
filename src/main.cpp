@@ -33,13 +33,16 @@ uint8_t getSum(const uint8_t *buffer, size_t length)
 
 void setNum(uint8_t *buffer, const float num)
 {
-    union transfer
-    {
-        float f;
-        uint8_t c[4];
-    } t;
-    t.f = num;
-    memcpy(buffer, t.c, 4);
+    // union transfer
+    // {
+    //     float f;
+    //     uint8_t c[4];
+    // } t;
+    // t.f = num;
+    // memcpy(buffer, t.c, 4);
+    buffer[0] = static_cast<int>(num / 10) + '0';
+    buffer[1] = static_cast<int>(num) % 10 + '0';
+    buffer[2] = static_cast<int>(num * 10) % 10 + '0';
 }
 
 bool recv(uint8_t *buffer)
@@ -114,14 +117,14 @@ void loop()
     float o2;
     digitalWrite(LED_PIN, LOW); //小灯亮
     delay(500);
-    if (!recv(buffer + 16))
+    if (!recv(o2))
     {
         serial_report.write("No sensor\n");
     }
     else
     {
         getId(buffer);
-        // setNum(buffer + 12, o2);
+        setNum(buffer + 12, o2);
         sum = getSum(buffer, 16);
         buffer[16] = sum;
         serial_report.write(head, 4);
